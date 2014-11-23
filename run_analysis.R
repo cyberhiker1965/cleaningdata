@@ -1,16 +1,29 @@
 #
-# Merges the training and the test sets to create one data set.
+# This script:
+# 1. Merges the training and the test sets to create one data set.
+# 2. Extracts only the measurements on the mean and standard deviation for each measurement. 
+# 3. Uses descriptive activity names to name the activities in the data set
+# 4. Appropriately labels the data set with descriptive variable names. 
+# 5. From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject.
+#
+
+#
+# First, make sure we start in the correct directory, all file paths are relative
+# to the starting point
 #
 library(data.table)
 
 setwd("C:/Users/david/datasciencecoursera/Getting and Cleaning Data/Project/cleaningdata")
 
+# read in the list of measeurements - we'll use this later to extract just the
+# measurements we want and apply appropriate column names
 
 filename = "./getdata-projectfiles-UCI HAR Dataset/UCI HAR Dataset/features.txt"
 
 features <- read.table(filename, head=FALSE, col.names=c("f_no","f_name"), sep=" ")
 
-
+# read in the activities - we'll use this later to convert the activity numbers in the
+# measurement data to a descriptive name
 
 filename = "./getdata-projectfiles-UCI HAR Dataset/UCI HAR Dataset/activity_labels.txt"
 
@@ -33,7 +46,8 @@ filename = "./getdata-projectfiles-UCI HAR Dataset/UCI HAR Dataset/test/X_test.t
 
 testX <- read.table(filename, head=FALSE, col.names=features$f_name)
 
-# we only need the measurements on the mean and standard deviation for each measurement. 
+# we only need the measurements on the mean and standard deviation for each measurement so
+# extract just the measurements we want 
 testXmeanstd <- testX[,features[grep("mean|std\\(\\)",features$f_name),1]]
 
 
@@ -58,40 +72,31 @@ filename = "./getdata-projectfiles-UCI HAR Dataset/UCI HAR Dataset/train/X_train
 
 trainX <- read.table(filename, head=FALSE, col.names=features$f_name)
 
-# we only need the measurements on the mean and standard deviation for each measurement. 
+# we only need the measurements on the mean and standard deviation for each measurement so
+# extract just the measurements we want
 
 trainXmeanstd <- trainX[,features[grep("mean|std\\(\\)",features$f_name),1]]
 
 # Now combine train info into a wide data frame
 trainwideframe <- cbind(trainsubjects, trainactivities, trainXmeanstd)
 
-# Now join the test and train data frames 
-
+#
+# Now join the test and train data frames so we have a single combined set of data
+#
 combined <- rbind(testwideframe, trainwideframe)
 
 
-
-# 2. Extracts only the measurements on the mean and standard deviation for each measurement. 
-
-#features[grep("mean\\(\\)",features$f_name),]
-#features[grep("std\\(\\)",features$f_name),]
-
-#features[grep("mean|std\\(\\)",features$f_name),1]
-
-
-# 3. Uses descriptive activity names to name the activities in the data set
+# Use descriptive activity names to name the activities in the data set
 
 combined$activity <- factor(combined$activity, activities$activity_no, activities$activity_name)
 
-# 4. Appropriately labels the data set with descriptive variable names. 
-
-# done throughout
-
-# 5. From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject.
+# Creates a second, independent tidy data set with the average of each variable for each activity and each subject.
 
 filename = "./getdata-projectfiles-UCI HAR Dataset/UCI HAR Dataset/final.txt"
 
+# needs converted into a data.table first so we can summarize
 combinedDT <- data.table(combined)
 write.table(combinedDT[, lapply(.SD,mean), by=c('subject','activity')], file = filename, sep=",", row.names=FALSE )
 
+# all done!
 
