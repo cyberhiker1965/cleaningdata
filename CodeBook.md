@@ -1,58 +1,43 @@
----
-title: "Vignette Title"
-author: "Vignette Author"
-date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Vignette Title}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\usepackage[utf8]{inputenc}
----
+Refer to README.md for the background on the project.
 
-Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The `html_vignette` output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The `html_vignette` format:
 
-- Never uses retina figures
-- Has a smaller default figure size
-- Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
+The input files are:
+features.txt - contains a list of 561 'features', each representing a specific data measurement. The
+file is indexed by feature number and feature name.
 
-## Vignette Info
+activity_labels.txt - constains a list of 6 activities. The file is indexed by activity number and
+activity name. 
 
-Note the various macros within the `vignette` setion of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
+The train and test directories contain the subject, activity and measurement data files.  
+NOTE: The Inertial Signals files are not used - they contain data not relevent to this project.
 
-## Styles
+subject_train - contains 7352 rows indicating which subject the corresponding data in 
+y_train and X_train refers to.
+y_train - contains 7352 rows indicating which activity was being done during the corresponding X_train measurements.
+X_train - contains 7352 rows of 561 data measurements
 
-The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
 
-    output: 
-      rmarkdown::html_vignette:
-        css: mystyles.css
+subject_test - contains 2947 rows indicating which subject the corresponding data in 
+y_test and X_test refers to.
+y_test - contains 2947 rows indicating which activity was being done during the corresponding X_test measurements.
+X_test - contains 2947 rows of 561 data measurements
 
-## Figures
 
-The figure sizes have been customised so that you can easily put two images side-by-side. 
+Method:
+The three files in the train directory are appended to each other columnwise - producing one dataframe
+containing all the training data.  Unneeded measurement columns are dropped from X_train and 
+appropriate column names applied.
 
-```{r, fig.show='hold'}
-plot(1:10)
-plot(10:1)
-```
+The three files in the test directory are appended to each other columnwise - producing one dataframe
+containing all the test data. Unneeded measurement columns are dropped from X_test and 
+appropriate column names applied.
 
-You can enable figure captions by `fig_caption: yes` in YAML:
+The training and test dataframes are appended producing one combined dataframe with all of the data.
 
-    output:
-      rmarkdown::html_vignette:
-        fig_caption: yes
+The activity column is updated, replacing number with descriptive text.
 
-Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
+Finally the data is summarized by subject and activity to btain the average value for each data
+measurement.
 
-## More Examples
+NOTE: The results are not sorted by subject as that was not a stated requirement.
 
-You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
-
-```{r, echo=FALSE, results='asis'}
-knitr::kable(head(mtcars, 10))
-```
-
-Also a quote using `>`:
-
-> "He who gives up [code] safety for [code] speed deserves neither."
-([via](https://twitter.com/hadleywickham/status/504368538874703872))
